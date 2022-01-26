@@ -3,7 +3,7 @@ function fhp
 tic;
 
 % time steps to simulate
-t_steps = 20; 
+t_steps = 3600; 
 disp("Running the simulation with " +t_steps+ " steps")
 
 % use FHP 1 collision
@@ -726,7 +726,7 @@ for t = 1:1:t_steps
     end
     
 %include the output in the simulation and therefore plot it everytime
-%end
+end
 
     % divide for course-graining
     divider = 5;
@@ -851,7 +851,8 @@ for t = 1:1:t_steps
 
     % show the current figure
     shg;
-    end
+    % for the continious graph showing
+    %end
 end
 
 % handle over- and underflow
