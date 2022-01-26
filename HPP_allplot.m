@@ -5,7 +5,7 @@
     numnodes_y = 80;
 
     % Number of timesteps over which to simulate.
-    t_end = 20;
+    t_end = 200;
 
     % 3D array of nodes to store the vectors that represent the occupied
     % cells at each node.  

@@ -20,7 +20,7 @@ function fhp
     numnodes_y = 2560/10;
 
     % Number of timesteps over which to simulate.
-    t_end = 2000;
+    t_end = 20;
 
     % 3D array of nodes to store the vectors that represent the occupied
     % cells at each node.  
