@@ -3,7 +3,7 @@ function fhp
 tic;
 
 % time steps to simulate
-t_steps = 3600; 
+t_steps = 50; 
 disp("Running the simulation with " +t_steps+ " steps")
 
 % use FHP 1 collision
@@ -19,8 +19,8 @@ use_FHP3 = true;
 %use_FHP3 = false;
 
 % board size
-board_x = 500;
-board_y = 200;
+board_x = 50;
+board_y = 20;
 % the board is build up top to bottom, left to right:
 % (1,1) (2,1) (3,1)
 % (1,2) (2,2) (3,2)
@@ -90,41 +90,44 @@ obstacles = zeros(board_x, board_y);
 obstacle_start = [100 75];
 obstacle_end   = [100 125];
 
+obstacle_start = [20 10];
+obstacle_end   = [20 15];
+
 % create the obstacle
-% for x = obstacle_start(1):1:obstacle_end(1)
-%     for y = obstacle_start(2):1:obstacle_end(2)
-%         obstacles(x, y) = 1;
-%     end
-% end
-
-
-% create a skew
-y = 75;
-for x = 100:1:150
-   obstacles(x,y) = 1;
-   y = y + 1;
-end
-    
-
-
-% setting up the board
-for x = 1:1:board_x
-    % do not include the top and bottom borders
-    for y = 2:1:(board_y-1)
-        if obstacles(x, y) ~= 1
-            % getting the cell of the coordinate
-            cur_cell = board(x, y, :);
-            
-            % setting the cell to to the right
-            cur_cell(1) = 1;
-            
-            % reinserting the cell made into the board
-            board(x, y, :) = cur_cell;
-        end
+for x = obstacle_start(1):1:obstacle_end(1)
+    for y = obstacle_start(2):1:obstacle_end(2)
+        obstacles(x, y) = 1;
     end
 end
 
 
+% create a skew
+% y = 75;
+% for x = 100:1:150
+%    obstacles(x,y) = 1;
+%    y = y + 1;
+% end
+    
+
+
+% setting up the board
+% for x = 1:1:board_x
+%     % do not include the top and bottom borders
+%     for y = 2:1:(board_y-1)
+%         if obstacles(x, y) ~= 1
+%             % getting the cell of the coordinate
+%             cur_cell = board(x, y, :);
+%             
+%             % setting the cell to to the right
+%             cur_cell(1) = 1;
+%             
+%             % reinserting the cell made into the board
+%             board(x, y, :) = cur_cell;
+%         end
+%     end
+% end
+
+board(10,12,1) = 1;
 
 % do the simulation
 for t = 1:1:t_steps
@@ -489,7 +492,7 @@ for t = 1:1:t_steps
                         if (cur_cell(7)==1) && (cur_cell(dir)==0) && ...
                                 (cur_cell(dir) == cur_cell(handle_over_under(dir-2)))
                             
-                            % setting every direction without standing still
+                            % setting every direction other than standing still
                             n_cell = [1 1 1 1 1 1 0];
                             
                             n_cell(handle_over_under(dir+2)) = 0;
@@ -510,13 +513,13 @@ for t = 1:1:t_steps
                 % an obstacle is there
             else
                 % inverting the velocities
-                n_cell(1) = cur_cell(4);
-                n_cell(2) = cur_cell(5);
-                n_cell(3) = cur_cell(6);
-                n_cell(4) = cur_cell(1);
-                n_cell(5) = cur_cell(2);
-                n_cell(6) = cur_cell(3);
-                n_cell(7) = cur_cell(7);
+%                 n_cell(1) = cur_cell(4);
+%                 n_cell(2) = cur_cell(5);
+%                 n_cell(3) = cur_cell(6);
+%                 n_cell(4) = cur_cell(1);
+%                 n_cell(5) = cur_cell(2);
+%                 n_cell(6) = cur_cell(3);
+%                 n_cell(7) = cur_cell(7);
             end
             % set the new cell (if nothing found, this is the same)
             board(x, y, :) = n_cell;
@@ -535,6 +538,15 @@ for t = 1:1:t_steps
             board(x, board_y, 6) board(x, board_y, 1) ...
             board(x, board_y, 2) board(x, board_y, 3) ...
             board(x, board_y, 7)];
+    end
+    
+    % Carry out collisions at obstacle points (no-slip).
+    for x = 1:1:board_x
+        for y = 1:1:board_y
+            if (obstacles(x, y) == 1)
+                board(x, y, :) = [board(x, y, 4) board(x, y, 5) board(x, y, 6) board(x, y, 1) board(x, y, 2) board(x, y, 3) board(x, y, 7)];
+            end
+        end
     end
     
     
@@ -562,11 +574,11 @@ for t = 1:1:t_steps
             % set the 1. component
             n_cell(1) = cur_cell(1);
             
-            % if the comes back into the left side it should reset to only
+            % if the particles goes out on the right, it's gone
             % going into direction 1
-            if n_x == 1 && y ~= 1 && y ~= board_y
-                n_cell = [1 0 0 0 0 0 0];
-            end 
+             if n_x == 1 && y ~= 1 && y ~= board_y
+                 n_cell = [0 0 0 0 0 0 0];
+             end 
             % set the new board
             n_board(n_x, n_y, :) = n_cell;
             
@@ -592,11 +604,11 @@ for t = 1:1:t_steps
                 % set the 1. component
                 n_cell(2) = cur_cell(2);
                 
-                % if the comes back into the left side it should reset to only
+                % if the particles goes out on the right, it's gone
                 % going into direction 1
-                if n_x == 1 && y ~= 1 && y ~= board_y
-                    n_cell = [1 0 0 0 0 0 0];
-                end
+                 if n_x == 1 && y ~= 1 && y ~= board_y
+                     n_cell = [0 0 0 0 0 0 0];
+                 end
                 % set the new board
                 n_board(n_x, n_y, :) = n_cell;
                 
@@ -689,11 +701,11 @@ for t = 1:1:t_steps
                 % set the 1. component
                 n_cell(6) = cur_cell(6);
                 
-                % if the comes back into the left side it should reset to only
+                % if the particles goes out on the right, it's gone
                 % going into direction 1
-                if n_x == 1 && y ~= 1 && y ~= board_y
-                    n_cell = [1 0 0 0 0 0 0];
-                end
+                 if n_x == 1 && y ~= 1 && y ~= board_y
+                     n_cell = [0 0 0 0 0 0 0];
+                 end
                 % set the new board
                 n_board(n_x, n_y, :) = n_cell;
                 
@@ -720,16 +732,21 @@ for t = 1:1:t_steps
     % set the new board
     board = n_board;
     
+    % letting new particles in on the left side
+%     for y = 1:1:board_y
+%         board(1,y,1)= 1;
+%     end
+    
     % provide feedback to the user that system is not frozen
     if mod(t, 5) == 0
         disp(t)
     end
     
 %include the output in the simulation and therefore plot it everytime
-end
+%end
 
     % divide for course-graining
-    divider = 5;
+    divider = 1;
     sub_board_x = board_x/divider;
     sub_board_y = board_y/divider;
 
@@ -776,8 +793,9 @@ end
                 nums(3)*c3 + nums(4)*c4 + nums(5)*c5 + nums(6)*c6 + nums(7)*c7);
 
             % calculate the density
-            density(x, y) = sum(nums) / ( 7 * (x_b_up - x_b_do) * ...
-                (y_b_up - y_b_do) );
+%             density(x, y) = sum(nums) / ( 7 * (x_b_up - x_b_do) * ...
+%                 (y_b_up - y_b_do) );
+            density(x, y) = sum(nums);
 
             % storing the average velocity
             avg_velocity_horizontal(cur_value) = avg_velocity(1);
@@ -852,7 +870,7 @@ end
     % show the current figure
     shg;
     % for the continious graph showing
-    %end
+    end
 end
 
 % handle over- and underflow
