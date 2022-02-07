@@ -12,15 +12,15 @@ use_FHP1 = true;
 
 % use FHP 2 collision rules
 use_FHP2 = true;
-%use_FHP2 = false;
+% use_FHP2 = false;
 
 % use FHP 3 collision rules
 use_FHP3 = true;
 %use_FHP3 = false;
 
 % board size
-board_x = 50;
-board_y = 20;
+board_x = 500;
+board_y = 200;
 % the board is build up top to bottom, left to right:
 % (1,1) (2,1) (3,1)
 % (1,2) (2,2) (3,2)
@@ -28,9 +28,9 @@ board_y = 20;
 
 % 7 states possible, 6 Directions and 1 standing still
 % Directions possible
-%    5   6
+%    5   6   
 %     \ /
-%  4 - 7 - 1
+%  4 - 7 - 1  
 %     / \
 %    3   2
 %
@@ -38,32 +38,32 @@ board_y = 20;
 % FHP  I:  (1,4) = (3,6) or (2,5)
 %       => (2,5) = (1,4) or (3,6)
 %       => (3,6) = (1,4) or (2,5)
-%          (2,4,6) = (2,5,6)
-%       => (1,3,5) = (1,3,5)
+%          (1,3,5) = (2,4,6)
+%       => (2,4,6) = (1,3,5)
 %
 % FHP II:  (1,7) = (2,6)
 %       => ...
-%          (3,5) = (7,1)
+%          (2,6) = (1,7)
 %       => ...
-%          (7,1,4) = (7,3,6) or (7,2,5)
+%          (1,4,7) = (3,6,7) or (2,5,7)
 %
 % FHP III: (2,3,5,6) = (1,3,4,6) or (1,2,4,5)
 %       => ...
 %          (2,3,5,6,7) = (1,3,4,6,7) or (1,2,4,5,7)
 %       => ...
-%          (2,4,6,7) = (2,4,6,7)
-%       => (1,3,5,7) = (1,3,5,7)
-%          (3,4,6) = (2,6,7) or (1,2,5)
+%          (1,3,5,7) = (2,4,6,7)
+%       => (2,4,6,7) = (1,3,5,7)
+%          (1,3,6) = (1,2,5) or (2,6,7)
 %       => ...
-%          (3,5,7) = (1,3,6) or (1,2,5)
+%          (2,6,7) = (1,3,6) or (1,2,5)
 %       => ...
-%          (2,3,4,5,6) = (1,2,4,6,7)
+%          (1,2,3,5,6) = (1,2,4,6,7)
 %       => ...
-%          (1,3,4,5,7) = (1,2,3,5,6)
+%          (1,2,4,6,7) = (1,2,3,5,6)
 %       => ...
-%          (3,4,6,7) = (1,2,4,6) or (1,2,5,7)
+%          (1,3,6,7) = (1,2,4,6) or (1,2,5,7)
 %       => ...
-%          (1,3,4,5) = (1,3,6,7) or (1,2,5,7)
+%          (1,2,4,6) = (1,3,6,7) or (1,2,5,7)
 %       => ...
 
 
@@ -90,9 +90,6 @@ obstacles = zeros(board_x, board_y);
 obstacle_start = [100 75];
 obstacle_end   = [100 125];
 
-obstacle_start = [20 10];
-obstacle_end   = [20 15];
-
 % create the obstacle
 for x = obstacle_start(1):1:obstacle_end(1)
     for y = obstacle_start(2):1:obstacle_end(2)
@@ -111,23 +108,24 @@ end
 
 
 % setting up the board
-% for x = 1:1:board_x
-%     % do not include the top and bottom borders
-%     for y = 2:1:(board_y-1)
-%         if obstacles(x, y) ~= 1
-%             % getting the cell of the coordinate
-%             cur_cell = board(x, y, :);
-%             
-%             % setting the cell to to the right
-%             cur_cell(1) = 1;
-%             
-%             % reinserting the cell made into the board
-%             board(x, y, :) = cur_cell;
-%         end
-%     end
-% end
+for x = 1:1:board_x
+    % do not include the top and bottom borders
+    for y = 2:1:(board_y-1)
+        if obstacles(x, y) ~= 1
+            % getting the cell of the coordinate
+            cur_cell = board(x, y, :);
+            
+            % setting the cell to to the right
+            cur_cell(1) = 1;
+            
+            % reinserting the cell made into the board
+            board(x, y, :) = cur_cell;
+        end
+    end
+end
 
-board(10,12,1) = 1;
+%board(7,8,:) = [0 1 0 0 0 0 0];
+%board(10,5,:) = [1 0 1 0 1 0 0];
 
 % do the simulation
 for t = 1:1:t_steps
@@ -136,8 +134,13 @@ for t = 1:1:t_steps
         % do not include top and bottom border
         for y = 2:1:(board_y-1)
             
+            
+            % get the current cell
+            cur_cell = board(x, y, :);
+                
             % ignore obstacle points
             if obstacles(x, y) ~= 1
+                
                 
                 % get the current cell
                 cur_cell = board(x, y, :);
@@ -153,7 +156,7 @@ for t = 1:1:t_steps
                     
                     % there is a static point and one other hitting that
                     % FHP 2:
-                    % (4,7) = (2,6)
+                    % (1,7) = (2,6) done
                     if  use_FHP2 && cur_cell(7) == 1
                         % finding the existing direction
                         dir = find(cur_cell, 1);
@@ -162,8 +165,8 @@ for t = 1:1:t_steps
                         n_cell(dir) = 0;
                         
                         % setting the new directions of the particles
-                        n_cell(handle_over_under(dir-2)) = 1;
-                        n_cell(handle_over_under(dir+2)) = 1;
+                        n_cell(handle_over_under(dir-1)) = 1;
+                        n_cell(handle_over_under(dir+1)) = 1;
                         
                         % there is now no standing still particle anymore
                         n_cell(7)   = 0;
@@ -172,28 +175,38 @@ for t = 1:1:t_steps
                         for dir = 1:1:6
                             
                             % FHP 1:
-                            % (1,4) = (3,6) or (2,5)
+                            % (1,4) = (3,6) or (2,5) done
                             if  use_FHP1 && (cur_cell(dir) == 1) && ...
                                     (cur_cell(dir) == cur_cell(handle_over_under(dir+3)))
                                 % random chance of 50% between the options
                                 r = rand;
                                 % for that we rotate the cells
-                                if r < 0.5
-                                    n_cell(1) = cur_cell(2);
-                                    n_cell(2) = cur_cell(3);
-                                    n_cell(3) = cur_cell(4);
-                                    n_cell(4) = cur_cell(5);
-                                    n_cell(5) = cur_cell(6);
-                                    n_cell(6) = cur_cell(1);
-                                else
+%                                 n_cell = [0 0 0 0 0 0 0];
+%                                 if r < 0.5
+%                                     n_cell(handle_over_under(dir+1)) = 1;
+%                                     n_cell(handle_over_under(dir-2)) = 1;
+%                                 else
+%                                     n_cell(handle_over_under(dir+2)) = 1;
+%                                     n_cell(handle_over_under(dir-1)) = 1;
+%                                 end
+
+                                if (r < 0.5)     % Counterclockwise.
                                     n_cell(1) = cur_cell(6);
                                     n_cell(2) = cur_cell(1);
                                     n_cell(3) = cur_cell(2);
                                     n_cell(4) = cur_cell(3);
                                     n_cell(5) = cur_cell(4);
                                     n_cell(6) = cur_cell(5);
+
+                                else             % Clockwise.
+                                    n_cell(1) = cur_cell(2);
+                                    n_cell(2) = cur_cell(3);
+                                    n_cell(3) = cur_cell(4);
+                                    n_cell(4) = cur_cell(5);
+                                    n_cell(5) = cur_cell(6);
+                                    n_cell(6) = cur_cell(1);
+
                                 end
-                                n_cell(7) = cur_cell(7);
                                 
                                 % exit loop as there was one pair found
                                 break
@@ -201,9 +214,9 @@ for t = 1:1:t_steps
                             end
                                 
                                 % FHP 2:
-                                % (3,5) = (1,7)
+                                % (2,6) = (1,7) done
                             if use_FHP2 && (cur_cell(dir)==1) && ...
-                                    (cur_cell(dir) == cur_cell(handle_over_under(dir+2)))
+                                    (cur_cell(dir) == cur_cell(handle_over_under(dir+4)))
                                 % as the loop starts at 1 it is always
                                 %  going to find the lower indexed
                                 %  direction first. Therefore it is
@@ -211,10 +224,10 @@ for t = 1:1:t_steps
                                 
                                 % resetting the incoming
                                 n_cell(dir) = 0;
-                                n_cell(handle_over_under(dir+2)) = 0;
+                                n_cell(handle_over_under(dir+4)) = 0;
                                 
                                 % setting the outgoing and the stationary
-                                n_cell(handle_over_under(dir-2)) = 1;
+                                n_cell(handle_over_under(dir-1)) = 1;
                                 n_cell(7) = 1;
                                 
                                 % exit the loop as there was a pair found
@@ -227,9 +240,18 @@ for t = 1:1:t_steps
                     
                     % FHP 1:
                     % if either 1,3,5 are set or not set (then 2,4,6 is set)
+                    % (1,3,5) = (2,3,5) done
                     if use_FHP1 && (cur_cell(1) == cur_cell(3)) && (cur_cell(3) == cur_cell(5))
-                        % leave the state as it is
-                        n_cell = cur_cell;
+                        
+                        n_cell = ~cur_cell;
+                        n_cell(7) = 0;
+%                         n_cell(1) = cur_cell(4);
+%                         n_cell(2) = cur_cell(5);
+%                         n_cell(3) = cur_cell(6);
+%                         n_cell(4) = cur_cell(1);
+%                         n_cell(5) = cur_cell(2);
+%                         n_cell(6) = cur_cell(3);
+%                         n_cell(7) = cur_cell(7);
                         
                     else
                         for dir = 1:1:6
@@ -238,27 +260,20 @@ for t = 1:1:t_steps
                             % opposing particles hit with one additional standing
                             %  still in the middle
                             % ... indicates a new line
-                            % (1,4,7) = (3,6,7) or (2,5,7)
+                            % (1,4,7) = (3,6,7) or (2,5,7) done
                             if use_FHP2 && (cur_cell(7) == 1) && (cur_cell(dir) == 1) && ...
                                     (cur_cell(dir) == cur_cell(handle_over_under(dir+3)))
                                 
                                 % random chance of 50% between the options
                                 r = rand;
                                 % for that we rotate the cells
+                                n_cell = [0 0 0 0 0 0 0];
                                 if r < 0.5
-                                    n_cell(1) = cur_cell(2);
-                                    n_cell(2) = cur_cell(3);
-                                    n_cell(3) = cur_cell(4);
-                                    n_cell(4) = cur_cell(5);
-                                    n_cell(5) = cur_cell(6);
-                                    n_cell(6) = cur_cell(1);
+                                    n_cell(handle_over_under(dir+1)) = 1;
+                                    n_cell(handle_over_under(dir-2)) = 1;
                                 else
-                                    n_cell(1) = cur_cell(6);
-                                    n_cell(2) = cur_cell(1);
-                                    n_cell(3) = cur_cell(2);
-                                    n_cell(4) = cur_cell(3);
-                                    n_cell(5) = cur_cell(4);
-                                    n_cell(6) = cur_cell(5);
+                                    n_cell(handle_over_under(dir+2)) = 1;
+                                    n_cell(handle_over_under(dir-1)) = 1;
                                 end
                                 n_cell(7) = cur_cell(7);
                                 
@@ -267,9 +282,9 @@ for t = 1:1:t_steps
                             end
                             
                             % FHP 3:
-                            % (3,5,7) = (1,3,5) or (1,2,5)
+                            % (2,6,7) = (1,3,5) or (1,2,5) done
                             if use_FHP3 && (cur_cell(7) == 1) && (cur_cell(dir) == 1) && ...
-                                    (cur_cell(dir) == cur_cell(handle_over_under(dir+2)))
+                                    (cur_cell(dir) == cur_cell(handle_over_under(dir+4)))
                                 
                                 % random chance between the two outcomes
                                 r = rand;
@@ -278,10 +293,10 @@ for t = 1:1:t_steps
                                 n_cell = [0 0 0 0 0 0 0];
                                 if r < 0.5
                                     n_cell(dir) = 1;
+                                    n_cell(handle_over_under(dir-1)) = 1;
                                     n_cell(handle_over_under(dir+3)) = 1;
-                                    n_cell(handle_over_under(dir+4)) = 1;
                                 else
-                                    n_cell(handle_over_under(dir+2)) = 1;
+                                    n_cell(handle_over_under(dir+1)) = 1;
                                     n_cell(handle_over_under(dir-1)) = 1;
                                     n_cell(handle_over_under(dir-2)) = 1;
                                     
@@ -292,10 +307,10 @@ for t = 1:1:t_steps
                             end
                             
                             % FHP 3:
-                            % (3,4,6) = (2,6,7) or (1,2,5)
+                            % (1,3,6) = (2,6,7) or (1,2,5) done
                             if use_FHP3 && (cur_cell(dir) == 1) && ...
-                                    (cur_cell(dir) == cur_cell(handle_over_under(dir+1))) && ...
-                                    (cur_cell(dir) == cur_cell(handle_over_under(dir+3)))
+                                    (cur_cell(dir) == cur_cell(handle_over_under(dir-1))) && ...
+                                    (cur_cell(dir) == cur_cell(handle_over_under(dir+2)))
                                 
                                 % random chance between the two outcomes
                                 r = rand;
@@ -304,11 +319,11 @@ for t = 1:1:t_steps
                                 n_cell = [0 0 0 0 0 0 0];
                                 if r < 0.5
                                     n_cell(7) = 1;
+                                    n_cell(handle_over_under(dir+1)) = 1;
                                     n_cell(handle_over_under(dir-1)) = 1;
-                                    n_cell(handle_over_under(dir+3)) = 1;
                                 else
-                                    n_cell(handle_over_under(dir+2)) = 1;
-                                    n_cell(handle_over_under(dir-1)) = 1;
+                                    n_cell(dir) = 1;
+                                    n_cell(handle_over_under(dir+1)) = 1;
                                     n_cell(handle_over_under(dir-2)) = 1;
                                     
                                 end
@@ -327,7 +342,7 @@ for t = 1:1:t_steps
                         
                         % going here for the directions not set as it
                         % is more understandable
-                        % (2,3,5,6) = (1,3,4,6) or (1,2,4,5)
+                        % (2,3,5,6) = (1,3,4,6) or (1,2,4,5) done 
                         if (cur_cell(7) == 0) && (cur_cell(dir) == 0) && ...
                                 (cur_cell(dir) == cur_cell(handle_over_under(dir+3)))
                             
@@ -360,24 +375,23 @@ for t = 1:1:t_steps
                             break
                         end
                         
-                        % (2,4,6,7) = (2,4,6,7) 
+                        % (1,3,5,7) = (2,4,6,7) done
                         if (cur_cell(7) == 1) && ...
                                 (cur_cell(1) == cur_cell(3)) && ...
                                 (cur_cell(3) == cur_cell(5))
                             
-                            
-                            % in this case let the cell as it is
-                            n_cell = cur_cell;
-                            
+                            % invert the cell while keeping the 7. one
+                            n_cell = ~cur_cell;
+                            n_cell(7) = cur_cell(7);
                             
                             % exit loop as there was one pair found
                             break
                         end
                         
-                        % (3,4,6,7) = (1,2,3,6) or (1,2,5,7)
+                        % (1,3,6,7) = (1,2,3,6) or (1,2,5,7) done
                         if (cur_cell(7)==1) && (cur_cell(dir)==1) && ...
-                                (cur_cell(dir) == cur_cell(handle_over_under(dir+1))) && ...
-                                (cur_cell(dir) == cur_cell(handle_over_under(dir+3)))
+                                (cur_cell(dir) == cur_cell(handle_over_under(dir+2))) && ...
+                                (cur_cell(dir) == cur_cell(handle_over_under(dir-1)))
                             
                             
                             % random chance for both outcomes
@@ -386,14 +400,14 @@ for t = 1:1:t_steps
                             % resetting the new cell
                             n_cell = [0 0 0 0 0 0 0];
                             if r < 0.5
+                                n_cell(dir) = 1;
                                 n_cell(handle_over_under(dir+1)) = 1;
                                 n_cell(handle_over_under(dir-1)) = 1;
                                 n_cell(handle_over_under(dir+3)) = 1;
-                                n_cell(handle_over_under(dir-2)) = 1;
                             else
                                 n_cell(7) = 1;
-                                n_cell(handle_over_under(dir-1)) = 1;
-                                n_cell(handle_over_under(dir+2)) = 1;
+                                n_cell(dir) = 1;
+                                n_cell(handle_over_under(dir+1)) = 1;
                                 n_cell(handle_over_under(dir-2)) = 1;
                                 
                             end
@@ -402,11 +416,11 @@ for t = 1:1:t_steps
                             break
                         end
                         
-                        % (1,3,4,5) = (1,3,6,7) or (1,2,5,7)
+                        % (1,2,4,6) = (1,3,6,7) or (1,2,5,7) done
                         if (cur_cell(7) == 0) && (cur_cell(dir) == 1) && ...
-                                (cur_cell(dir) == cur_cell(handle_over_under(dir+2))) && ...
+                                (cur_cell(dir) == cur_cell(handle_over_under(dir+1))) && ...
                                 (cur_cell(dir) == cur_cell(handle_over_under(dir+3))) && ...
-                                (cur_cell(dir) == cur_cell(handle_over_under(dir+4)))
+                                (cur_cell(dir) == cur_cell(handle_over_under(dir-1)))
                             
                             % random chance for the output
                             r = rand;
@@ -414,17 +428,19 @@ for t = 1:1:t_steps
                             % resetting the new cell
                             n_cell = [0 0 0 0 0 0 0];
                             if r < 0.5
-                                n_cell(handle_over_under(dir-1)) = 1;
+                                n_cell(7) = 1;
+                                n_cell(dir) = 1;
                                 n_cell(handle_over_under(dir+2)) = 1;
+                                n_cell(handle_over_under(dir-1)) = 1;
                                 
                             else
+                                n_cell(7) = 1;
+                                n_cell(dir) = 1;
                                 n_cell(handle_over_under(dir+1)) = 1;
                                 n_cell(handle_over_under(dir-2)) = 1;
                                 
                             end
                             
-                            n_cell(7) = 1;
-                            n_cell(dir) = 1;
                             
                             % exit loop as there was one pair found
                             break
@@ -438,7 +454,7 @@ for t = 1:1:t_steps
                     for dir = 1:1:6
                         
                         % looking after the 0s here, as it is easier
-                        % (2,3,5,6,7) = (1,3,4,6,7) or (1,2,4,5,7)
+                        % (2,3,5,6,7) = (1,3,4,6,7) or (1,2,4,5,7) done
                         if (cur_cell(7)==1) && (cur_cell(dir)==0) && ...
                                 (cur_cell(dir) == cur_cell(handle_over_under(dir+3)))
                             
@@ -473,29 +489,29 @@ for t = 1:1:t_steps
                         end
                         
                         % going for the 0 here for obvious reasons
-                        % (2,3,4,5,6) = (1,2,4,6,7)
+                        % (1,2,3,5,6) = (1,2,4,6,7) done
                         if (cur_cell(7)==0) && (cur_cell(dir)==0)
                             
                             
                             % setting every direction + standing still
                             n_cell = [1 1 1 1 1 1 1];
                             
-                            n_cell(handle_over_under(dir+2)) = 0;
-                            n_cell(handle_over_under(dir-2)) = 0;
+                            n_cell(handle_over_under(dir+1)) = 0;
+                            n_cell(handle_over_under(dir-1)) = 0;
                             
                             % exit loop as there was one pair found
                             break
                         end
                         
                         % the reversed rule to the previous one
-                        % (1,3,4,5,7) = (1,2,3,5,6)
+                        % (1,2,4,6,7) = (1,2,3,5,6) done
                         if (cur_cell(7)==1) && (cur_cell(dir)==0) && ...
-                                (cur_cell(dir) == cur_cell(handle_over_under(dir-2)))
+                                (cur_cell(dir) == cur_cell(handle_over_under(dir+2)))
                             
                             % setting every direction other than standing still
                             n_cell = [1 1 1 1 1 1 0];
                             
-                            n_cell(handle_over_under(dir+2)) = 0;
+                            n_cell(handle_over_under(dir+1)) = 0;
                             
                             % exit loop as there was one pair found
                             break
@@ -513,17 +529,17 @@ for t = 1:1:t_steps
                 % an obstacle is there
             else
                 % inverting the velocities
-%                 n_cell(1) = cur_cell(4);
-%                 n_cell(2) = cur_cell(5);
-%                 n_cell(3) = cur_cell(6);
-%                 n_cell(4) = cur_cell(1);
-%                 n_cell(5) = cur_cell(2);
-%                 n_cell(6) = cur_cell(3);
-%                 n_cell(7) = cur_cell(7);
+                n_cell(1) = cur_cell(4);
+                n_cell(2) = cur_cell(5);
+                n_cell(3) = cur_cell(6);
+                n_cell(4) = cur_cell(1);
+                n_cell(5) = cur_cell(2);
+                n_cell(6) = cur_cell(3);
+                n_cell(7) = cur_cell(7);
             end
+            
             % set the new cell (if nothing found, this is the same)
             board(x, y, :) = n_cell;
-            
         end
     end
     
@@ -541,13 +557,13 @@ for t = 1:1:t_steps
     end
     
     % Carry out collisions at obstacle points (no-slip).
-    for x = 1:1:board_x
-        for y = 1:1:board_y
-            if (obstacles(x, y) == 1)
-                board(x, y, :) = [board(x, y, 4) board(x, y, 5) board(x, y, 6) board(x, y, 1) board(x, y, 2) board(x, y, 3) board(x, y, 7)];
-            end
-        end
-    end
+%     for x = 1:1:board_x
+%         for y = 1:1:board_y
+%             if (obstacles(x, y) == 1)
+%                 board(x, y, :) = [board(x, y, 4) board(x, y, 5) board(x, y, 6) board(x, y, 1) board(x, y, 2) board(x, y, 3) board(x, y, 7)];
+%             end
+%         end
+%     end
     
     
     % create the new board for the next step
@@ -586,8 +602,8 @@ for t = 1:1:t_steps
             
             % Step into direction 2:
             % if in the border, do not move downwards
-            if( y ~= board_y)
-                n_y = y + 1;
+            if y ~= 1
+                n_y = y - 1;
                 
                 if mod(y,2) == 0
                     if x == board_x
@@ -617,8 +633,8 @@ for t = 1:1:t_steps
             
             % Step into direction 3:
             % if in the border, do not move downwards
-            if( y ~= board_y)
-                n_y = y + 1;
+            if y ~= 1
+                n_y = y - 1;
                 
                 if mod(y,2) == 1
                     if x == 1
@@ -657,8 +673,8 @@ for t = 1:1:t_steps
             
             % Step into direction 5:
             % if in the border, do not move upwards
-            if y ~= 1
-                n_y = y - 1;
+            if y ~= board_y
+                n_y = y + 1;
                 
                 if mod(y,2) == 1
                     if x == 1
@@ -683,8 +699,8 @@ for t = 1:1:t_steps
             
             % Step into direction 6:
             % if in the border, do not move upwards
-            if y ~= 1
-                n_y = y - 1;
+            if y ~= board_y
+                n_y = y + 1;
                 
                 if mod(y,2) == 0
                     if x == board_x
@@ -733,9 +749,9 @@ for t = 1:1:t_steps
     board = n_board;
     
     % letting new particles in on the left side
-%     for y = 1:1:board_y
-%         board(1,y,1)= 1;
-%     end
+    for y = 1:1:board_y
+        board(1,y,1)= 1;
+    end
     
     % provide feedback to the user that system is not frozen
     if mod(t, 5) == 0
@@ -743,10 +759,10 @@ for t = 1:1:t_steps
     end
     
 %include the output in the simulation and therefore plot it everytime
-%end
+end
 
     % divide for course-graining
-    divider = 1;
+    divider = 5;
     sub_board_x = board_x/divider;
     sub_board_y = board_y/divider;
 
@@ -824,7 +840,8 @@ for t = 1:1:t_steps
     nexttile
     title('Flow')
     quiver(avg_velocity_x_coordinates, avg_velocity_y_coordinates, ...
-        avg_velocity_horizontal, avg_velocity_vertical);
+        avg_velocity_horizontal, avg_velocity_vertical);        
+        %avg_velocity_horizontal, avg_velocity_vertical); 
 
     % plotting the streamline into the avg velocity vectors graph
     streamline(avg_streamline_horizontal.', avg_streamline_vertical.', streamline_xs, streamline_ys);
@@ -870,7 +887,7 @@ for t = 1:1:t_steps
     % show the current figure
     shg;
     % for the continious graph showing
-    end
+    %end
 end
 
 % handle over- and underflow
