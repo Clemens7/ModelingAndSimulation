@@ -3,7 +3,7 @@ function fhp
 tic;
 
 % time steps to simulate
-t_steps = 50; 
+t_steps = 25000; 
 disp("Running the simulation with " +t_steps+ " steps")
 
 % use FHP 1 collision
@@ -21,10 +21,6 @@ use_FHP3 = true;
 % board size
 board_x = 500;
 board_y = 200;
-% the board is build up top to bottom, left to right:
-% (1,1) (2,1) (3,1)
-% (1,2) (2,2) (3,2)
-% (1,3) (2,3) (3,3)
 
 % 7 states possible, 6 Directions and 1 standing still
 % Directions possible
@@ -100,7 +96,7 @@ end
 
 % create a skew
 % y = 75;
-% for x = 100:1:150
+% for x = 75:1:125
 %    obstacles(x,y) = 1;
 %    y = y + 1;
 % end
@@ -124,8 +120,8 @@ for x = 1:1:board_x
     end
 end
 
-%board(7,8,:) = [0 1 0 0 0 0 0];
-%board(10,5,:) = [1 0 1 0 1 0 0];
+% board(10,8,:) = [1 0 0 0 0 0 0];
+% board(10,5,:) = [1 0 0 0 0 0 0];
 
 % do the simulation
 for t = 1:1:t_steps
@@ -578,152 +574,163 @@ for t = 1:1:t_steps
             cur_cell = board(x, y, :);
             
             % Step into direction 1:
-            if x == board_x
-                n_x = 1;
-            else
+%             if x == board_x
+%                 n_x = 1;
+%             else
                 n_x = x + 1;
-            end
+%             end
             n_y = y;
             
-            % get the new cell
-            n_cell = n_board(n_x, n_y, :);
-            % set the 1. component
-            n_cell(1) = cur_cell(1);
-            
-            % if the particles goes out on the right, it's gone
-            % going into direction 1
-             if n_x == 1 && y ~= 1 && y ~= board_y
-                 n_cell = [0 0 0 0 0 0 0];
-             end 
-            % set the new board
-            n_board(n_x, n_y, :) = n_cell;
-            
-            
+            if n_x > board_x
+                
+            else
+                % get the new cell
+                n_cell = n_board(n_x, n_y, :);
+                % set the 1. component
+                n_cell(1) = cur_cell(1);
+
+                % if the particles goes out on the right, it's gone
+
+                % set the new board
+                n_board(n_x, n_y, :) = n_cell;
+            end
             
             % Step into direction 2:
             % if in the border, do not move downwards
-            if y ~= 1
+            if y > 1
                 n_y = y - 1;
                 
                 if mod(y,2) == 0
-                    if x == board_x
-                        n_x = 1;
-                    else
+%                     if x == board_x
+%                         n_x = 1;
+%                     else
                         n_x = x + 1;
-                    end
+%                     end
                 else
                     n_x = x;
                 end
                 
-                % get the new cell
-                n_cell = n_board(n_x, n_y, :);
-                % set the 1. component
-                n_cell(2) = cur_cell(2);
-                
-                % if the particles goes out on the right, it's gone
-                % going into direction 1
-                 if n_x == 1 && y ~= 1 && y ~= board_y
-                     n_cell = [0 0 0 0 0 0 0];
+                if n_x > board_x
+%                      n_cell = [0 0 0 0 0 0 0];
+                else
+                    % get the new cell
+                    n_cell = n_board(n_x, n_y, :);
+                    % set the 1. component
+                    n_cell(2) = cur_cell(2);
+
+                    % if the particles goes out on the right, it's gone
+                    % going into direction 1
+
+                    % set the new board
+                    n_board(n_x, n_y, :) = n_cell;
                  end
-                % set the new board
-                n_board(n_x, n_y, :) = n_cell;
-                
             end
             
             
             % Step into direction 3:
             % if in the border, do not move downwards
-            if y ~= 1
+            if y > 1
                 n_y = y - 1;
                 
                 if mod(y,2) == 1
-                    if x == 1
-                        n_x = board_x;
-                    else
+%                     if x == 1
+%                         n_x = board_x;
+%                     else
                         n_x = x - 1;
-                    end
+%                     end
                 else
                     n_x = x;
                 end
                 
-                % get the new cell
-                n_cell = n_board(n_x, n_y, :);
-                % set the 1. component
-                n_cell(3) = cur_cell(3);
-                % set the new board
-                n_board(n_x, n_y, :) = n_cell;
-                
+                if n_x < 1
+                    
+                else
+                    % get the new cell
+                    n_cell = n_board(n_x, n_y, :);
+                    % set the 1. component
+                    n_cell(3) = cur_cell(3);
+                    % set the new board
+                    n_board(n_x, n_y, :) = n_cell;
+                end
             end
             
             % Step into direction 4:
-            if x == 1
-                n_x = board_x;
-            else
+%             if x == 1
+%                 n_x = board_x;
+%             else
                 n_x = x - 1;
-            end
+%             end
             n_y = y;
             
-            % get the new cell
-            n_cell = n_board(n_x, n_y, :);
-            
-            % set the 1. component
-            n_cell(4) = cur_cell(4);
-            % set the new board
-            n_board(n_x, n_y, :) = n_cell;
+            if n_x < 1 
+                
+            else
+                % get the new cell
+                n_cell = n_board(n_x, n_y, :);
+
+                % set the 1. component
+                n_cell(4) = cur_cell(4);
+                % set the new board
+                n_board(n_x, n_y, :) = n_cell;
+            end
             
             % Step into direction 5:
             % if in the border, do not move upwards
-            if y ~= board_y
+            if y < board_y
                 n_y = y + 1;
                 
                 if mod(y,2) == 1
-                    if x == 1
-                        n_x = board_x;
-                    else
+%                     if x == 1
+%                         n_x = board_x;
+%                     else
                         n_x = x - 1;
-                    end
+%                     end
                 else
                     n_x = x;
                 end
                 
-                
-                % get the new cell
-                n_cell = n_board(n_x, n_y, :);
-                % set the 1. component
-                n_cell(5) = cur_cell(5);
-                % set the new board
-                n_board(n_x, n_y, :) = n_cell;
-                
+                if n_x < 1
+                    
+                else
+                    % get the new cell
+                    n_cell = n_board(n_x, n_y, :);
+                    % set the 1. component
+                    n_cell(5) = cur_cell(5);
+                    % set the new board
+                    n_board(n_x, n_y, :) = n_cell;
+                end
                 
             end
             
             % Step into direction 6:
             % if in the border, do not move upwards
-            if y ~= board_y
+            if y < board_y
                 n_y = y + 1;
                 
                 if mod(y,2) == 0
-                    if x == board_x
-                        n_x = 1;
-                    else
+%                     if x == board_x
+%                         n_x = 1;
+%                     else
                         n_x = x + 1;
-                    end
+%                     end
                 else
                     n_x = x;
                 end
                 
-                % get the new cell
-                n_cell = n_board(n_x, n_y, :);
-                % set the 1. component
-                n_cell(6) = cur_cell(6);
-                
-                % if the particles goes out on the right, it's gone
-                % going into direction 1
-                 if n_x == 1 && y ~= 1 && y ~= board_y
-                     n_cell = [0 0 0 0 0 0 0];
+                if n_x > board_x
+%                      n_cell = [0 0 0 0 0 0 0];
+                 else
+                    % get the new cell
+                    n_cell = n_board(n_x, n_y, :);
+                    % set the 1. component
+                    n_cell(6) = cur_cell(6);
+
+                    % if the particles goes out on the right, it's gone
+                    % going into direction 1
+                 
+                    % set the new board
+                    n_board(n_x, n_y, :) = n_cell;
                  end
-                % set the new board
-                n_board(n_x, n_y, :) = n_cell;
                 
             end
             
@@ -750,6 +757,8 @@ for t = 1:1:t_steps
     
     % letting new particles in on the left side
     for y = 1:1:board_y
+%         n_cell = [1 0 0 0 0 0 0];
+%         board(1,y,:) = n_cell;
         board(1,y,1)= 1;
     end
     
@@ -759,10 +768,10 @@ for t = 1:1:t_steps
     end
     
 %include the output in the simulation and therefore plot it everytime
-end
+%end
 
     % divide for course-graining
-    divider = 5;
+    divider = 10;
     sub_board_x = board_x/divider;
     sub_board_y = board_y/divider;
 
@@ -886,8 +895,14 @@ end
 
     % show the current figure
     shg;
+    
+    if mod(t, 25) == 0
+       filename = strcat('./figs/FHP_with_',int2str(t),'_steps.png')
+       saveas(gcf, filename) 
+    end
+    
     % for the continious graph showing
-    %end
+    end
 end
 
 % handle over- and underflow
